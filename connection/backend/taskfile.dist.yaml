@@ -1,0 +1,58 @@
+version: "3"
+
+tasks:
+  install:
+    dotenv:
+      - .env.local
+    cmds:
+      - uv sync --all-groups
+    aliases:
+      - install-deps
+
+  lint:
+    dotenv:
+      - .env.local
+    cmds:
+      - |
+        mkdir -p reports
+        uv run ruff check --output-format json --output-file reports/ruff.json src tests
+        uv run bandit -r src -o reports/bandit.json --format json
+        uv run ty check --output-format gitlab > reports/gl-code-quality-report.json
+        uv run pylint --output-format json2 --output reports/pylint.json tests src
+
+  lint-fix:
+    dotenv:
+      - .env.local
+    cmds:
+      - |
+        uv run ruff format src tests
+        uv run ruff check --fix src tests
+        uv run ty check
+        uv run bandit -r src
+        uv run pylint tests src
+
+  test:
+    dotenv:
+      - .env.local
+    cmds:
+      - |
+        uv run pytest -n auto tests -m "not validation" --cov=src --cov-report=term-missing:skip-covered
+
+  test-report:
+    dotenv:
+      - .env.local
+    cmds:
+      - |
+        mkdir -p reports
+        uv run pytest -n auto tests -m "not validation" \
+          --junitxml=reports/junit.xml \
+          --cov=src \
+          --cov-report=xml:reports/coverage.xml \
+          --cov-report=term-missing
+    
+
+  generate-schema:
+    dotenv:
+      - .env.local
+    cmds:
+      - uv run connection schema generate ../

@@ -1,0 +1,40 @@
+version: "3"
+
+tasks:
+  install:
+    dotenv:
+      - .env
+    cmds:
+      - pnpm install
+    aliases:
+      - install-deps
+
+  lint:
+    dotenv:
+      - .env
+    cmds:
+      - pnpm lint
+
+  test-build:
+    dotenv:
+      - .env.local
+    cmds:
+      - pnpm build --debug --no-mangling --profile
+
+  lint-fix:
+    dotenv:
+      - .env.local
+    cmds:
+      - pnpm lint:fix
+
+  start-dev:
+    dotenv:
+      - .env.local
+    cmds:
+      - pnpm dev
+
+  generate-schema:
+    dotenv:
+      - .env.local
+    cmds:
+      - pnpm orval
